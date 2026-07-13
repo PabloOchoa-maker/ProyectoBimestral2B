@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.streamflow</groupId>
+  <groupId>streamflow</groupId>
   <artifactId>proyecto-bimestral-2</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
@@ -51,7 +51,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.0</version>
         <configuration>
-          <mainClass>com.streamflow.Main</mainClass>
+          <mainClass>streamflow.Main</mainClass>
         </configuration>
       </plugin>
     </plugins>
