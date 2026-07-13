@@ -1,0 +1,18 @@
+# Maven
+target/
+
+# NetBeans
+nbproject/private/
+nbactions.xml
+build/
+dist/
+
+# Base de datos SQLite (se genera al ejecutar)
+db/*.db
+
+# IDE / SO
+.idea/
+*.iml
+.vscode/
+Thumbs.db
+desktop.ini
