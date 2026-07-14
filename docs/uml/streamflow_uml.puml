@@ -1,9 +1,19 @@
 @startuml streamflow_uml
 title Sistema StreamFlow — Diagrama de Clases (MVC + SOLID)
 
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam linetype ortho
 skinparam classAttributeIconSize 0
 skinparam nodesep 40
 skinparam ranksep 60
+skinparam class {
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+    FontName Segoe UI
+}
+skinparam packageStyle rectangle
+skinparam classFontStyle bold
 hide empty members
 
 package modelo #E8F5E9 {
@@ -95,8 +105,8 @@ package modelo #E8F5E9 {
     Contenido --> Calidad
     Contenido --> Genero
 
-    Usuario "1" o-- "0..*" Contenido : favoritos
-    Usuario "1" *-- "1" Suscripcion
+    Usuario "1" o--> "0..*" Contenido : favoritos
+    Usuario "1" *--> "1" Suscripcion
 }
 
 package vista #E1F5FE {
@@ -104,6 +114,13 @@ package vista #E1F5FE {
         +mostrarMenu(): void
         +mostrarContenidos(lista: List<Contenido>): void
     }
+
+    interface IVista {
+        +mostrarMenu(): void
+        +mostrarContenidos(lista: List<Contenido>): void
+    }
+
+    ConsolaVista ..|> IVista
 }
 
 package controlador #FFFDE7 {
@@ -165,10 +182,10 @@ package servicio #EDE7F6 {
         +recomendarPorGenero(u: Usuario): List<Contenido>
     }
 
-    ContenidoServiceImpl ..|> IContenidoService
-    UsuarioServiceImpl ..|> IUsuarioService
-    SuscripcionServiceImpl ..|> ISuscripcionService
-    RecomendacionServiceImpl ..|> IRecomendacionService
+    ContenidoServiceImpl .up.|> IContenidoService
+    UsuarioServiceImpl .up.|> IUsuarioService
+    SuscripcionServiceImpl .up.|> ISuscripcionService
+    RecomendacionServiceImpl .up.|> IRecomendacionService
 }
 
 package persistencia #FBE9E7 {
@@ -228,18 +245,18 @@ package persistencia #FBE9E7 {
         +obtenerConexion(): Connection
     }
 
-    ContenidoDaoSQLite ..|> IContenidoDao
-    UsuarioDaoSQLite ..|> IUsuarioDao
-    ContenidoDaoMemoria ..|> IContenidoDao
-    UsuarioDaoMemoria ..|> IUsuarioDao
+    ContenidoDaoSQLite .up.|> IContenidoDao
+    UsuarioDaoSQLite .up.|> IUsuarioDao
+    ContenidoDaoMemoria .up.|> IContenidoDao
+    UsuarioDaoMemoria .up.|> IUsuarioDao
 
     ContenidoDaoSQLite ..> ConexionBD
     UsuarioDaoSQLite ..> ConexionBD
 }
 
 ' --- Flujo entre capas: cada capa solo habla con la de abajo ---
-ConsolaVista ..> ContenidoControlador
-ConsolaVista ..> UsuarioControlador
+IVista ..> ContenidoControlador
+IVista ..> UsuarioControlador
 
 ContenidoControlador --> IContenidoService
 UsuarioControlador --> IUsuarioService
@@ -251,14 +268,20 @@ UsuarioServiceImpl --> IUsuarioDao
 SuscripcionServiceImpl --> IContenidoDao
 RecomendacionServiceImpl --> IContenidoDao
 
+
+' --- Columna vertical forzada: vista arriba, luego controlador/servicio/persistencia ---
+ConsolaVista -[hidden]-> IVista
+IVista -[hidden]-> ContenidoControlador
+ContenidoControlador -[hidden]-> IContenidoService
+ContenidoServiceImpl -[hidden]-> IContenidoDao
+
 legend right
-  **Leyenda**
-  Flecha hueca continua .... herencia (extends)
-  Flecha hueca punteada ... implementa interfaz
-  Flecha simple continua .. asociación (atributo)
-  Flecha simple punteada .. dependencia de uso
-  Rombo hueco ............. agregación
-  Rombo relleno ........... composición
+  <b>Leyenda</b>
+  --|>  herencia (extends)
+  ..|>  implementa interfaz
+  -->   asociación / dependencia con atributo
+  ..>   dependencia de uso
+  o-->  agregación    *-->  composición
 endlegend
 
 @enduml
