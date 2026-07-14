@@ -1,0 +1,264 @@
+@startuml streamflow_uml
+title Sistema StreamFlow — Diagrama de Clases (MVC + SOLID)
+
+skinparam classAttributeIconSize 0
+skinparam nodesep 40
+skinparam ranksep 60
+hide empty members
+
+package modelo #E8F5E9 {
+
+    class Usuario {
+        -id: String
+        -nombre: String
+        -email: String
+        -favoritos: List<Contenido>
+        +agregarFavorito(c: Contenido): void
+    }
+
+    class Suscripcion {
+        -id: String
+        -fechaInicio: LocalDate
+        -costoMensual: double
+    }
+
+    package contrato #E3F2FD {
+        interface Detallable {
+            +obtenerDetalles(): String
+        }
+        interface Reproducible {
+            +reproducir(): void
+        }
+    }
+
+    abstract class Contenido {
+        #id: String
+        #titulo: String
+        #genero: Genero
+        #calidad: Calidad
+        #duracionMin: int
+        #costoBase: double
+        +calcularCosto(): double
+        +{abstract} reproducir(): void
+        +{abstract} obtenerDetalles(): String
+    }
+
+    class Pelicula {
+        -director: String
+        +reproducir(): void
+        +obtenerDetalles(): String
+    }
+
+    class Serie {
+        -temporadas: int
+        -episodios: int
+        +reproducir(): void
+        +obtenerDetalles(): String
+    }
+
+    class Documental {
+        -tema: String
+        +reproducir(): void
+        +obtenerDetalles(): String
+    }
+
+    class Podcast <<OCP: nuevo tipo>> {
+        -presentador: String
+        +reproducir(): void
+        +obtenerDetalles(): String
+    }
+
+    enum Calidad {
+        SD
+        HD
+        UHD_4K
+        -factor: double
+        +getFactor(): double
+    }
+
+    enum Genero {
+        ACCION
+        COMEDIA
+        DRAMA
+        TERROR
+        DOCUMENTAL
+    }
+
+    Contenido ..|> Detallable
+    Contenido ..|> Reproducible
+
+    Pelicula --|> Contenido
+    Serie --|> Contenido
+    Documental --|> Contenido
+    Podcast --|> Contenido
+
+    Contenido --> Calidad
+    Contenido --> Genero
+
+    Usuario "1" o-- "0..*" Contenido : favoritos
+    Usuario "1" *-- "1" Suscripcion
+}
+
+package vista #E1F5FE {
+    class ConsolaVista {
+        +mostrarMenu(): void
+        +mostrarContenidos(lista: List<Contenido>): void
+    }
+}
+
+package controlador #FFFDE7 {
+
+    class ContenidoControlador {
+        -contenidoService: IContenidoService
+        +registrar(c: Contenido): boolean
+        +listar(): List<Contenido>
+    }
+
+    class UsuarioControlador {
+        -usuarioService: IUsuarioService
+        -suscripcionService: ISuscripcionService
+        -recomendacionService: IRecomendacionService
+        +facturar(idUsuario: String): double
+        +recomendar(idUsuario: String): List<Contenido>
+    }
+}
+
+package servicio #EDE7F6 {
+
+    interface IContenidoService {
+        +registrar(c: Contenido): boolean
+        +listar(): List<Contenido>
+    }
+
+    interface IUsuarioService {
+        +registrar(u: Usuario): boolean
+        +buscarPorId(id: String): Usuario
+    }
+
+    interface ISuscripcionService {
+        +calcularCostoMensual(u: Usuario): double
+    }
+
+    interface IRecomendacionService {
+        +recomendarPorGenero(u: Usuario): List<Contenido>
+    }
+
+    class ContenidoServiceImpl {
+        -contenidoDao: IContenidoDao
+        +registrar(c: Contenido): boolean
+        +listar(): List<Contenido>
+    }
+
+    class UsuarioServiceImpl {
+        -usuarioDao: IUsuarioDao
+        +registrar(u: Usuario): boolean
+        +buscarPorId(id: String): Usuario
+    }
+
+    class SuscripcionServiceImpl {
+        -contenidoDao: IContenidoDao
+        +calcularCostoMensual(u: Usuario): double
+    }
+
+    class RecomendacionServiceImpl {
+        -contenidoDao: IContenidoDao
+        +recomendarPorGenero(u: Usuario): List<Contenido>
+    }
+
+    ContenidoServiceImpl ..|> IContenidoService
+    UsuarioServiceImpl ..|> IUsuarioService
+    SuscripcionServiceImpl ..|> ISuscripcionService
+    RecomendacionServiceImpl ..|> IRecomendacionService
+}
+
+package persistencia #FBE9E7 {
+
+    interface IContenidoDao {
+        +insertar(c: Contenido): boolean
+        +listar(): List<Contenido>
+        +buscarPorId(id: String): Contenido
+        +actualizar(c: Contenido): boolean
+        +eliminar(id: String): boolean
+    }
+
+    interface IUsuarioDao {
+        +insertar(u: Usuario): boolean
+        +listar(): List<Usuario>
+        +buscarPorId(id: String): Usuario
+        +actualizar(u: Usuario): boolean
+        +eliminar(id: String): boolean
+    }
+
+    class ContenidoDaoSQLite {
+        +insertar(c: Contenido): boolean
+        +listar(): List<Contenido>
+        +buscarPorId(id: String): Contenido
+        +actualizar(c: Contenido): boolean
+        +eliminar(id: String): boolean
+    }
+
+    class UsuarioDaoSQLite {
+        +insertar(u: Usuario): boolean
+        +listar(): List<Usuario>
+        +buscarPorId(id: String): Usuario
+        +actualizar(u: Usuario): boolean
+        +eliminar(id: String): boolean
+    }
+
+    class ContenidoDaoMemoria <<test>> {
+        -datos: List<Contenido>
+        +insertar(c: Contenido): boolean
+        +listar(): List<Contenido>
+        +buscarPorId(id: String): Contenido
+        +actualizar(c: Contenido): boolean
+        +eliminar(id: String): boolean
+    }
+
+    class UsuarioDaoMemoria <<test>> {
+        -datos: List<Usuario>
+        +insertar(u: Usuario): boolean
+        +listar(): List<Usuario>
+        +buscarPorId(id: String): Usuario
+        +actualizar(u: Usuario): boolean
+        +eliminar(id: String): boolean
+    }
+
+    class ConexionBD {
+        -URL: String
+        +obtenerConexion(): Connection
+    }
+
+    ContenidoDaoSQLite ..|> IContenidoDao
+    UsuarioDaoSQLite ..|> IUsuarioDao
+    ContenidoDaoMemoria ..|> IContenidoDao
+    UsuarioDaoMemoria ..|> IUsuarioDao
+
+    ContenidoDaoSQLite ..> ConexionBD
+    UsuarioDaoSQLite ..> ConexionBD
+}
+
+' --- Flujo entre capas: cada capa solo habla con la de abajo ---
+ConsolaVista ..> ContenidoControlador
+ConsolaVista ..> UsuarioControlador
+
+ContenidoControlador --> IContenidoService
+UsuarioControlador --> IUsuarioService
+UsuarioControlador --> ISuscripcionService
+UsuarioControlador --> IRecomendacionService
+
+ContenidoServiceImpl --> IContenidoDao
+UsuarioServiceImpl --> IUsuarioDao
+SuscripcionServiceImpl --> IContenidoDao
+RecomendacionServiceImpl --> IContenidoDao
+
+legend right
+  **Leyenda**
+  Flecha hueca continua .... herencia (extends)
+  Flecha hueca punteada ... implementa interfaz
+  Flecha simple continua .. asociación (atributo)
+  Flecha simple punteada .. dependencia de uso
+  Rombo hueco ............. agregación
+  Rombo relleno ........... composición
+endlegend
+
+@enduml
