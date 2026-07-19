@@ -1,6 +1,9 @@
 package streamflow.vista;
 
 import java.util.List;
+import java.util.Scanner;
+import streamflow.controlador.ContenidoControlador;
+import streamflow.controlador.UsuarioControlador;
 import streamflow.modelo.Contenido;
 
 /**
@@ -30,6 +33,40 @@ public class ConsolaVista implements IVista {
         for (Contenido c : lista) {
             System.out.println(" - " + c.obtenerDetalles());
         }
+    }
+
+    @Override
+    public void iniciar(ContenidoControlador contenidoControlador,
+                        UsuarioControlador usuarioControlador) {
+        Scanner sc = new Scanner(System.in);
+        String opcion;
+        do {
+            mostrarMenu();
+            opcion = sc.nextLine().trim();
+            switch (opcion) {
+                case "1":
+                    mostrarContenidos(contenidoControlador.listar());
+                    break;
+                case "2":
+                    System.out.print("ID del usuario a facturar: ");
+                    String idFactura = sc.nextLine().trim();
+                    double total = usuarioControlador.facturar(idFactura);
+                    mostrarMensaje("Costo mensual total: $" + total);
+                    break;
+                case "3":
+                    System.out.print("ID del usuario para recomendar: ");
+                    String idRec = sc.nextLine().trim();
+                    List<Contenido> recomendados = usuarioControlador.recomendar(idRec);
+                    mostrarContenidos(recomendados);
+                    break;
+                case "0":
+                    mostrarMensaje("Hasta pronto.");
+                    break;
+                default:
+                    mostrarMensaje("Opcion no valida.");
+            }
+        } while (!opcion.equals("0"));
+        sc.close();
     }
 
     /**
