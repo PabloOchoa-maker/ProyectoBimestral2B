@@ -113,11 +113,14 @@ package vista #E1F5FE {
     class ConsolaVista {
         +mostrarMenu(): void
         +mostrarContenidos(lista: List<Contenido>): void
+        +mostrarMensaje(mensaje: String): void
+        +iniciar(contenidoControlador: ContenidoControlador, usuarioControlador: UsuarioControlador): void
     }
 
     interface IVista {
         +mostrarMenu(): void
         +mostrarContenidos(lista: List<Contenido>): void
+        +iniciar(contenidoControlador: ContenidoControlador, usuarioControlador: UsuarioControlador): void
     }
 
     ConsolaVista ..|> IVista
