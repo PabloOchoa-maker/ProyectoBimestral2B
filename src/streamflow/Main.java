@@ -1,8 +1,6 @@
 package streamflow;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Scanner;
 import streamflow.controlador.ContenidoControlador;
 import streamflow.controlador.UsuarioControlador;
 import streamflow.modelo.Calidad;
@@ -27,6 +25,7 @@ import streamflow.servicio.RecomendacionServiceImpl;
 import streamflow.servicio.SuscripcionServiceImpl;
 import streamflow.servicio.UsuarioServiceImpl;
 import streamflow.vista.ConsolaVista;
+import streamflow.vista.IVista;
 
 /**
  * Punto de entrada de StreamFlow. Cablea todas las capas (composicion raiz):
@@ -52,14 +51,14 @@ public class Main {
         UsuarioControlador usuarioControlador = new UsuarioControlador(
                 usuarioService, suscripcionService, recomendacionService);
 
-        // 4. Vista.
-        ConsolaVista vista = new ConsolaVista();
+        // 4. Vista (se programa contra la interfaz IVista).
+        IVista vista = new ConsolaVista();
 
         // 5. Datos de ejemplo (solo la primera ejecucion, si la BD esta vacia).
         sembrarDatos(contenidoControlador, usuarioControlador);
 
-        // 6. Bucle de menu.
-        ejecutarMenu(vista, contenidoControlador, usuarioControlador);
+        // 6. La vista arranca el bucle de interaccion (Scanner y menu viven en ella).
+        vista.iniciar(contenidoControlador, usuarioControlador);
     }
 
     private static void sembrarDatos(ContenidoControlador contenidoControlador,
@@ -81,39 +80,5 @@ public class Main {
         Contenido favorito = contenidoControlador.listar().get(0);
         usuario.agregarFavorito(favorito);
         usuarioControlador.registrar(usuario);
-    }
-
-    private static void ejecutarMenu(ConsolaVista vista,
-                                     ContenidoControlador contenidoControlador,
-                                     UsuarioControlador usuarioControlador) {
-        Scanner sc = new Scanner(System.in);
-        String opcion;
-        do {
-            vista.mostrarMenu();
-            opcion = sc.nextLine().trim();
-            switch (opcion) {
-                case "1":
-                    vista.mostrarContenidos(contenidoControlador.listar());
-                    break;
-                case "2":
-                    System.out.print("ID del usuario a facturar: ");
-                    String idFactura = sc.nextLine().trim();
-                    double total = usuarioControlador.facturar(idFactura);
-                    vista.mostrarMensaje("Costo mensual total: $" + total);
-                    break;
-                case "3":
-                    System.out.print("ID del usuario para recomendar: ");
-                    String idRec = sc.nextLine().trim();
-                    List<Contenido> recomendados = usuarioControlador.recomendar(idRec);
-                    vista.mostrarContenidos(recomendados);
-                    break;
-                case "0":
-                    vista.mostrarMensaje("Hasta pronto.");
-                    break;
-                default:
-                    vista.mostrarMensaje("Opcion no valida.");
-            }
-        } while (!opcion.equals("0"));
-        sc.close();
     }
 }
