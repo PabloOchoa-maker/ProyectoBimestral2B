@@ -2,8 +2,8 @@ package streamflow.vista;
 
 import java.util.List;
 import java.util.Scanner;
-import streamflow.controlador.ContenidoControlador;
-import streamflow.controlador.UsuarioControlador;
+import streamflow.controlador.IContenidoControlador;
+import streamflow.controlador.IUsuarioControlador;
 import streamflow.modelo.Contenido;
 
 /**
@@ -36,8 +36,8 @@ public class ConsolaVista implements IVista {
     }
 
     @Override
-    public void iniciar(ContenidoControlador contenidoControlador,
-                        UsuarioControlador usuarioControlador) {
+    public void iniciar(IContenidoControlador contenidoControlador,
+                        IUsuarioControlador usuarioControlador) {
         Scanner sc = new Scanner(System.in);
         String opcion;
         do {

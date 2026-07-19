@@ -9,7 +9,7 @@ import streamflow.servicio.IContenidoService;
  * Solo conoce la interfaz {@link IContenidoService}, nunca la implementacion
  * concreta ni los DAOs.
  */
-public class ContenidoControlador {
+public class ContenidoControlador implements IContenidoControlador {
 
     private final IContenidoService contenidoService;
 
@@ -17,10 +17,12 @@ public class ContenidoControlador {
         this.contenidoService = contenidoService;
     }
 
+    @Override
     public boolean registrar(Contenido c) {
         return contenidoService.registrar(c);
     }
 
+    @Override
     public List<Contenido> listar() {
         return contenidoService.listar();
     }
