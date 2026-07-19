@@ -114,19 +114,30 @@ package vista #E1F5FE {
         +mostrarMenu(): void
         +mostrarContenidos(lista: List<Contenido>): void
         +mostrarMensaje(mensaje: String): void
-        +iniciar(contenidoControlador: ContenidoControlador, usuarioControlador: UsuarioControlador): void
+        +iniciar(contenidoControlador: IContenidoControlador, usuarioControlador: IUsuarioControlador): void
     }
 
     interface IVista {
         +mostrarMenu(): void
         +mostrarContenidos(lista: List<Contenido>): void
-        +iniciar(contenidoControlador: ContenidoControlador, usuarioControlador: UsuarioControlador): void
+        +iniciar(contenidoControlador: IContenidoControlador, usuarioControlador: IUsuarioControlador): void
     }
 
     ConsolaVista ..|> IVista
 }
 
 package controlador #FFFDE7 {
+
+    interface IContenidoControlador {
+        +registrar(c: Contenido): boolean
+        +listar(): List<Contenido>
+    }
+
+    interface IUsuarioControlador {
+        +registrar(u: Usuario): boolean
+        +facturar(idUsuario: String): double
+        +recomendar(idUsuario: String): List<Contenido>
+    }
 
     class ContenidoControlador {
         -contenidoService: IContenidoService
@@ -138,9 +149,13 @@ package controlador #FFFDE7 {
         -usuarioService: IUsuarioService
         -suscripcionService: ISuscripcionService
         -recomendacionService: IRecomendacionService
+        +registrar(u: Usuario): boolean
         +facturar(idUsuario: String): double
         +recomendar(idUsuario: String): List<Contenido>
     }
+
+    ContenidoControlador ..|> IContenidoControlador
+    UsuarioControlador ..|> IUsuarioControlador
 }
 
 package servicio #EDE7F6 {
@@ -258,8 +273,8 @@ package persistencia #FBE9E7 {
 }
 
 ' --- Flujo entre capas: cada capa solo habla con la de abajo ---
-IVista ..> ContenidoControlador
-IVista ..> UsuarioControlador
+IVista ..> IContenidoControlador
+IVista ..> IUsuarioControlador
 
 ContenidoControlador --> IContenidoService
 UsuarioControlador --> IUsuarioService

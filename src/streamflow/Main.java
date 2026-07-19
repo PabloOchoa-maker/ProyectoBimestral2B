@@ -2,6 +2,8 @@ package streamflow;
 
 import java.time.LocalDate;
 import streamflow.controlador.ContenidoControlador;
+import streamflow.controlador.IContenidoControlador;
+import streamflow.controlador.IUsuarioControlador;
 import streamflow.controlador.UsuarioControlador;
 import streamflow.modelo.Calidad;
 import streamflow.modelo.Contenido;
@@ -46,9 +48,10 @@ public class Main {
         ISuscripcionService suscripcionService = new SuscripcionServiceImpl(contenidoDao);
         IRecomendacionService recomendacionService = new RecomendacionServiceImpl(contenidoDao);
 
-        // 3. Controladores (dependen de las interfaces de servicio).
-        ContenidoControlador contenidoControlador = new ContenidoControlador(contenidoService);
-        UsuarioControlador usuarioControlador = new UsuarioControlador(
+        // 3. Controladores (dependen de las interfaces de servicio). Se declaran
+        //    con su interfaz para que las capas de arriba no dependan de la clase.
+        IContenidoControlador contenidoControlador = new ContenidoControlador(contenidoService);
+        IUsuarioControlador usuarioControlador = new UsuarioControlador(
                 usuarioService, suscripcionService, recomendacionService);
 
         // 4. Vista (se programa contra la interfaz IVista).
@@ -61,8 +64,8 @@ public class Main {
         vista.iniciar(contenidoControlador, usuarioControlador);
     }
 
-    private static void sembrarDatos(ContenidoControlador contenidoControlador,
-                                     UsuarioControlador usuarioControlador) {
+    private static void sembrarDatos(IContenidoControlador contenidoControlador,
+                                     IUsuarioControlador usuarioControlador) {
         if (!contenidoControlador.listar().isEmpty()) {
             return;
         }

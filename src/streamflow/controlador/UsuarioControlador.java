@@ -11,7 +11,7 @@ import streamflow.servicio.IUsuarioService;
  * Controlador de usuarios. Orquesta los servicios de usuario, suscripcion y
  * recomendacion sin acoplarse a sus implementaciones concretas.
  */
-public class UsuarioControlador {
+public class UsuarioControlador implements IUsuarioControlador {
 
     private final IUsuarioService usuarioService;
     private final ISuscripcionService suscripcionService;
@@ -25,10 +25,12 @@ public class UsuarioControlador {
         this.recomendacionService = recomendacionService;
     }
 
+    @Override
     public boolean registrar(Usuario u) {
         return usuarioService.registrar(u);
     }
 
+    @Override
     public double facturar(String idUsuario) {
         Usuario u = usuarioService.buscarPorId(idUsuario);
         if (u == null) {
@@ -37,6 +39,7 @@ public class UsuarioControlador {
         return suscripcionService.calcularCostoMensual(u);
     }
 
+    @Override
     public List<Contenido> recomendar(String idUsuario) {
         Usuario u = usuarioService.buscarPorId(idUsuario);
         if (u == null) {

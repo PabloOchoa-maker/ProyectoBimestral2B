@@ -1,8 +1,8 @@
 package streamflow.vista;
 
 import java.util.List;
-import streamflow.controlador.ContenidoControlador;
-import streamflow.controlador.UsuarioControlador;
+import streamflow.controlador.IContenidoControlador;
+import streamflow.controlador.IUsuarioControlador;
 import streamflow.modelo.Contenido;
 
 public interface IVista {
@@ -18,6 +18,6 @@ public interface IVista {
      * @param contenidoControlador controlador para operaciones de contenido
      * @param usuarioControlador    controlador para operaciones de usuario
      */
-    void iniciar(ContenidoControlador contenidoControlador,
-                 UsuarioControlador usuarioControlador);
+    void iniciar(IContenidoControlador contenidoControlador,
+                 IUsuarioControlador usuarioControlador);
 }
