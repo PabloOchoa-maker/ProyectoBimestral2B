@@ -54,14 +54,15 @@ public class Main {
         IUsuarioControlador usuarioControlador = new UsuarioControlador(
                 usuarioService, suscripcionService, recomendacionService);
 
-        // 4. Vista (se programa contra la interfaz IVista).
-        IVista vista = new ConsolaVista();
+        // 4. Vista (se programa contra la interfaz IVista). Los controladores
+        //    se inyectan en el constructor de la vista concreta.
+        IVista vista = new ConsolaVista(contenidoControlador, usuarioControlador);
 
         // 5. Datos de ejemplo (solo la primera ejecucion, si la BD esta vacia).
         sembrarDatos(contenidoControlador, usuarioControlador);
 
         // 6. La vista arranca el bucle de interaccion (Scanner y menu viven en ella).
-        vista.iniciar(contenidoControlador, usuarioControlador);
+        vista.iniciar();
     }
 
     private static void sembrarDatos(IContenidoControlador contenidoControlador,

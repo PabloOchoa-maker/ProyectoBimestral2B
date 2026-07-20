@@ -11,6 +11,23 @@ import streamflow.modelo.Contenido;
  */
 public class ConsolaVista implements IVista {
 
+    private final IContenidoControlador contenidoControlador;
+    private final IUsuarioControlador usuarioControlador;
+
+    /**
+     * Cablea esta vista concreta con sus colaboradores (los controladores).
+     * La dependencia hacia las interfaces de controlador vive aqui, en la
+     * implementacion, no en el contrato {@link IVista}.
+     *
+     * @param contenidoControlador controlador para operaciones de contenido
+     * @param usuarioControlador    controlador para operaciones de usuario
+     */
+    public ConsolaVista(IContenidoControlador contenidoControlador,
+                        IUsuarioControlador usuarioControlador) {
+        this.contenidoControlador = contenidoControlador;
+        this.usuarioControlador = usuarioControlador;
+    }
+
     @Override
     public void mostrarMenu() {
         System.out.println();
@@ -36,8 +53,7 @@ public class ConsolaVista implements IVista {
     }
 
     @Override
-    public void iniciar(IContenidoControlador contenidoControlador,
-                        IUsuarioControlador usuarioControlador) {
+    public void iniciar() {
         Scanner sc = new Scanner(System.in);
         String opcion;
         do {
