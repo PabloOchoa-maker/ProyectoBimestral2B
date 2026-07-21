@@ -70,4 +70,59 @@
     nbproject/build-impl.xml file. 
 
     -->
+
+    <!--
+      Ejecuta las pruebas con JUnit 5.
+
+      El target 'test' que genera NetBeans usa la tarea <junit> de Ant, que es
+      de JUnit 4 y no reconoce las anotaciones de Jupiter: reporta todas las
+      clases como "Invalid test class ... No runnable methods". Por eso aqui se
+      lanza directamente el runner oficial de JUnit 5 (el console launcher que
+      esta en lib/).
+
+      Uso:  ant test-junit5
+      El target 'test' de mas abajo delega en este, asi que el boton Test de
+      NetBeans (Alt+F6) tambien ejecuta las pruebas con JUnit 5.
+
+      El atributo dir="${basedir}" es necesario: ConexionBD apunta a la base con
+      una ruta relativa (db/baseDeDatosStreamflow.db), asi que las pruebas de
+      SQLite solo encuentran el archivo si se ejecutan desde la raiz del
+      proyecto.
+    -->
+    <target name="test-junit5" depends="compile-test"
+            description="Ejecuta todas las pruebas con el runner de JUnit 5.">
+        <!--
+          El path se define aqui dentro y no a nivel de proyecto: fuera de un
+          target, Ant lo evaluaria antes de que 'init' defina las propiedades y
+          el classpath quedaria con los ${...} sin resolver.
+        -->
+        <path id="junit5.test.classpath">
+            <pathelement location="${build.test.classes.dir}"/>
+            <pathelement location="${build.classes.dir}"/>
+            <fileset dir="lib">
+                <include name="sqlite-jdbc-*.jar"/>
+                <include name="slf4j-api-*.jar"/>
+            </fileset>
+        </path>
+        <java jar="lib/junit-platform-console-standalone-1.11.3.jar"
+              fork="true"
+              failonerror="true"
+              dir="${basedir}">
+            <arg value="execute"/>
+            <arg value="-cp"/>
+            <arg pathref="junit5.test.classpath"/>
+            <arg value="--scan-classpath=${build.test.classes.dir}"/>
+            <arg value="--details=tree"/>
+            <arg value="--disable-banner"/>
+        </java>
+    </target>
+
+    <!--
+      Sobrescribe el target 'test' que define nbproject/build-impl.xml para que
+      el boton Test de NetBeans (Alt+F6) use el runner de JUnit 5 en lugar del
+      de JUnit 4. Un target definido aqui tiene prioridad sobre el importado.
+    -->
+    <target name="test" depends="test-junit5"
+            description="Ejecuta todas las pruebas (JUnit 5)."/>
+
 </project>
