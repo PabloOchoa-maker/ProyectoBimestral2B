@@ -81,7 +81,8 @@
       esta en lib/).
 
       Uso:  ant test-junit5
-      En NetBeans: clic derecho sobre build.xml -> Run Target -> test-junit5
+      El target 'test' de mas abajo delega en este, asi que el boton Test de
+      NetBeans (Alt+F6) tambien ejecuta las pruebas con JUnit 5.
 
       El atributo dir="${basedir}" es necesario: ConexionBD apunta a la base con
       una ruta relativa (db/baseDeDatosStreamflow.db), asi que las pruebas de
@@ -115,5 +116,13 @@
             <arg value="--disable-banner"/>
         </java>
     </target>
+
+    <!--
+      Sobrescribe el target 'test' que define nbproject/build-impl.xml para que
+      el boton Test de NetBeans (Alt+F6) use el runner de JUnit 5 en lugar del
+      de JUnit 4. Un target definido aqui tiene prioridad sobre el importado.
+    -->
+    <target name="test" depends="test-junit5"
+            description="Ejecuta todas las pruebas (JUnit 5)."/>
 
 </project>
