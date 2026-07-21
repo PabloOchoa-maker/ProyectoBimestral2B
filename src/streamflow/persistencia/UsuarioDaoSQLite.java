@@ -7,17 +7,22 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import streamflow.modelo.Contenido;
 import streamflow.modelo.Suscripcion;
 import streamflow.modelo.Usuario;
 
 /**
  * Implementacion de {@link IUsuarioDao} sobre SQLite. La suscripcion se guarda
- * en columnas planas dentro de la misma fila del usuario. Los favoritos no se
- * persisten (se mantienen en memoria durante la ejecucion).
+ * en columnas planas dentro de la misma fila del usuario. Los favoritos viven en
+ * la tabla puente 'usuario_favorito' y se reconstruyen al leer el usuario, para
+ * lo cual se apoya en un {@link IContenidoDao} recibido por constructor.
  */
 public class UsuarioDaoSQLite implements IUsuarioDao {
 
-    public UsuarioDaoSQLite() {
+    private final IContenidoDao contenidoDao;
+
+    public UsuarioDaoSQLite(IContenidoDao contenidoDao) {
+        this.contenidoDao = contenidoDao;
         ConexionBD.inicializar();
     }
 
@@ -29,11 +34,18 @@ public class UsuarioDaoSQLite implements IUsuarioDao {
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
             enlazarUsuario(ps, u);
-            return ps.executeUpdate() == 1;
+            if (ps.executeUpdate() != 1) {
+                return false;
+            }
         } catch (SQLException e) {
             System.out.println("Error al insertar usuario: " + e.getMessage());
             return false;
         }
+        // El usuario puede llegar con favoritos ya marcados en memoria.
+        for (Contenido favorito : u.getFavoritos()) {
+            agregarFavorito(u.getId(), favorito);
+        }
+        return true;
     }
 
     @Override
@@ -49,24 +61,33 @@ public class UsuarioDaoSQLite implements IUsuarioDao {
         } catch (SQLException e) {
             System.out.println("Error al listar usuarios: " + e.getMessage());
         }
+        // Los favoritos se cargan con el ResultSet ya cerrado, para no anidar
+        // consultas sobre una lectura en curso.
+        for (Usuario u : lista) {
+            cargarFavoritos(u);
+        }
         return lista;
     }
 
     @Override
     public Usuario buscarPorId(String id) {
+        Usuario encontrado = null;
         String sql = "SELECT * FROM usuario WHERE id = ?";
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapear(rs);
+                    encontrado = mapear(rs);
                 }
             }
         } catch (SQLException e) {
             System.out.println("Error al buscar usuario: " + e.getMessage());
         }
-        return null;
+        if (encontrado != null) {
+            cargarFavoritos(encontrado);
+        }
+        return encontrado;
     }
 
     @Override
@@ -108,7 +129,57 @@ public class UsuarioDaoSQLite implements IUsuarioDao {
         }
     }
 
+    @Override
+    public boolean agregarFavorito(String idUsuario, Contenido c) {
+        if (idUsuario == null || c == null) {
+            return false;
+        }
+        // INSERT OR IGNORE: si ya era favorito, no es un error, simplemente no
+        // se duplica la fila.
+        String sql = "INSERT OR IGNORE INTO usuario_favorito (usuario_id, contenido_id) "
+                + "VALUES (?, ?)";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, idUsuario);
+            ps.setString(2, c.getId());
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error al agregar favorito: " + e.getMessage());
+            return false;
+        }
+    }
+
     // ---------- Helpers ----------
+
+    /**
+     * Lee los favoritos del usuario en la tabla puente y los reconstruye como
+     * objetos {@link Contenido} usando el DAO de contenidos.
+     *
+     * @param u usuario al que se le cargan los favoritos
+     */
+    private void cargarFavoritos(Usuario u) {
+        List<String> ids = new ArrayList<>();
+        String sql = "SELECT contenido_id FROM usuario_favorito WHERE usuario_id = ?";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, u.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getString("contenido_id"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al cargar favoritos: " + e.getMessage());
+            return;
+        }
+        for (String idContenido : ids) {
+            Contenido c = contenidoDao.buscarPorId(idContenido);
+            if (c != null) {
+                u.agregarFavorito(c);
+            }
+        }
+    }
 
     private void enlazarUsuario(PreparedStatement ps, Usuario u) throws SQLException {
         ps.setString(1, u.getId());

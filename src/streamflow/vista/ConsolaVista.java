@@ -47,6 +47,7 @@ public class ConsolaVista implements IVista {
         System.out.println("3. Recomendar por genero");
         System.out.println("4. Registrar contenido");
         System.out.println("5. Registrar usuario");
+        System.out.println("6. Agregar favorito a un usuario");
         System.out.println("0. Salir");
         System.out.println("==============================");
         System.out.print("Seleccione una opcion: ");
@@ -92,6 +93,9 @@ public class ConsolaVista implements IVista {
                     break;
                 case "5":
                     registrarUsuario(sc);
+                    break;
+                case "6":
+                    agregarFavorito(sc);
                     break;
                 case "0":
                     mostrarMensaje("Hasta pronto.");
@@ -174,6 +178,38 @@ public class ConsolaVista implements IVista {
         mostrarMensaje(ok
                 ? "Usuario registrado correctamente."
                 : "No se pudo registrar (ID duplicado o datos invalidos).");
+    }
+
+    /**
+     * Pide el usuario y le marca como favorito un contenido del catalogo,
+     * elegido por su numero en la lista.
+     *
+     * @param sc scanner del bucle de interaccion
+     */
+    private void agregarFavorito(Scanner sc) {
+        System.out.println("--- Agregar favorito ---");
+        String idUsuario = leerLinea(sc, "ID del usuario: ");
+
+        List<Contenido> catalogo = contenidoControlador.listar();
+        if (catalogo.isEmpty()) {
+            mostrarMensaje("No hay contenidos registrados todavia.");
+            return;
+        }
+        System.out.println("Contenidos disponibles:");
+        for (int i = 0; i < catalogo.size(); i++) {
+            System.out.println(" " + (i + 1) + ". " + catalogo.get(i).obtenerDetalles());
+        }
+
+        int numero = leerEntero(sc, "Numero del contenido: ");
+        if (numero < 1 || numero > catalogo.size()) {
+            mostrarMensaje("Numero fuera de rango.");
+            return;
+        }
+
+        boolean ok = usuarioControlador.agregarFavorito(idUsuario, catalogo.get(numero - 1));
+        mostrarMensaje(ok
+                ? "Favorito agregado correctamente."
+                : "No se pudo agregar (el usuario no existe).");
     }
 
     /**

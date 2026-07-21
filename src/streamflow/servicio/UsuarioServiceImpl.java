@@ -1,5 +1,6 @@
 package streamflow.servicio;
 
+import streamflow.modelo.Contenido;
 import streamflow.modelo.Usuario;
 import streamflow.persistencia.IUsuarioDao;
 
@@ -32,5 +33,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
             return null;
         }
         return usuarioDao.buscarPorId(id);
+    }
+
+    @Override
+    public boolean agregarFavorito(String idUsuario, Contenido c) {
+        if (idUsuario == null || idUsuario.isEmpty() || c == null) {
+            return false;
+        }
+        if (usuarioDao.buscarPorId(idUsuario) == null) {
+            return false;
+        }
+        return usuarioDao.agregarFavorito(idUsuario, c);
     }
 }

@@ -15,4 +15,6 @@ public interface IUsuarioControlador {
     double facturar(String idUsuario);
 
     List<Contenido> recomendar(String idUsuario);
+
+    boolean agregarFavorito(String idUsuario, Contenido c);
 }

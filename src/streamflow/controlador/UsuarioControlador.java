@@ -47,4 +47,9 @@ public class UsuarioControlador implements IUsuarioControlador {
         }
         return recomendacionService.recomendarPorGenero(u);
     }
+
+    @Override
+    public boolean agregarFavorito(String idUsuario, Contenido c) {
+        return usuarioService.agregarFavorito(idUsuario, c);
+    }
 }

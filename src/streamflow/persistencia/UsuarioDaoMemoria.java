@@ -2,6 +2,7 @@ package streamflow.persistencia;
 
 import java.util.ArrayList;
 import java.util.List;
+import streamflow.modelo.Contenido;
 import streamflow.modelo.Usuario;
 
 /**
@@ -49,5 +50,18 @@ public class UsuarioDaoMemoria implements IUsuarioDao {
     @Override
     public boolean eliminar(String id) {
         return datos.removeIf(u -> u.getId().equals(id));
+    }
+
+    @Override
+    public boolean agregarFavorito(String idUsuario, Contenido c) {
+        if (idUsuario == null || c == null) {
+            return false;
+        }
+        Usuario u = buscarPorId(idUsuario);
+        if (u == null) {
+            return false;
+        }
+        u.agregarFavorito(c);
+        return true;
     }
 }

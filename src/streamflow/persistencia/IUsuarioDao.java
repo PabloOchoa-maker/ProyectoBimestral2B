@@ -1,6 +1,7 @@
 package streamflow.persistencia;
 
 import java.util.List;
+import streamflow.modelo.Contenido;
 import streamflow.modelo.Usuario;
 
 public interface IUsuarioDao {
@@ -14,4 +15,6 @@ public interface IUsuarioDao {
     boolean actualizar(Usuario u);
 
     boolean eliminar(String id);
+
+    boolean agregarFavorito(String idUsuario, Contenido c);
 }

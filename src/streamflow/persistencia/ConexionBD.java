@@ -33,7 +33,8 @@ public class ConexionBD {
     }
 
     /**
-     * Crea las tablas 'contenido' y 'usuario' si aun no existen.
+     * Crea las tablas 'contenido', 'usuario' y 'usuario_favorito' si aun no
+     * existen.
      */
     public static void inicializar() {
         String sqlContenido = "CREATE TABLE IF NOT EXISTS contenido ("
@@ -55,10 +56,20 @@ public class ConexionBD {
                 + "suscripcion_fecha TEXT, "
                 + "suscripcion_costo REAL)";
 
+        // Tabla puente: relaciona cada usuario con los contenidos que marco
+        // como favoritos. La clave primaria compuesta evita duplicados.
+        String sqlFavorito = "CREATE TABLE IF NOT EXISTS usuario_favorito ("
+                + "usuario_id TEXT NOT NULL, "
+                + "contenido_id TEXT NOT NULL, "
+                + "PRIMARY KEY (usuario_id, contenido_id), "
+                + "FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE, "
+                + "FOREIGN KEY (contenido_id) REFERENCES contenido(id) ON DELETE CASCADE)";
+
         try (Connection conexion = obtenerConexion();
              Statement st = conexion.createStatement()) {
             st.execute(sqlContenido);
             st.execute(sqlUsuario);
+            st.execute(sqlFavorito);
         } catch (SQLException e) {
             System.out.println("Error al inicializar la base de datos: " + e.getMessage());
         }
