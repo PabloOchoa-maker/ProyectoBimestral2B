@@ -40,7 +40,9 @@ public class Main {
     public static void main(String[] args) {
         // 1. Persistencia (implementacion concreta elegida aqui).
         IContenidoDao contenidoDao = new ContenidoDaoSQLite();
-        IUsuarioDao usuarioDao = new UsuarioDaoSQLite();
+        // El DAO de usuarios necesita el de contenidos para reconstruir los
+        // favoritos que lee de la tabla puente.
+        IUsuarioDao usuarioDao = new UsuarioDaoSQLite(contenidoDao);
 
         // 2. Servicios (dependen de las interfaces DAO).
         IContenidoService contenidoService = new ContenidoServiceImpl(contenidoDao);

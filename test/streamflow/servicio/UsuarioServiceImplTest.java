@@ -4,6 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import streamflow.modelo.Calidad;
+import streamflow.modelo.Contenido;
+import streamflow.modelo.Genero;
+import streamflow.modelo.Pelicula;
 import streamflow.modelo.Usuario;
 import streamflow.persistencia.UsuarioDaoMemoria;
 
@@ -56,5 +60,19 @@ class UsuarioServiceImplTest {
     void buscarPorIdNuloOvacioDevuelveNull() {
         assertNull(service.buscarPorId(null));
         assertNull(service.buscarPorId(""));
+    }
+
+    @Test
+    void agregarFavoritoSoloFuncionaConUsuarioYcontenidoValidos() {
+        service.registrar(usuarioDe("u1", "Pablo"));
+        Contenido peli = new Pelicula("c1", "Interstellar", Genero.DRAMA,
+                Calidad.HD, 169, 4.0, "Nolan");
+
+        assertTrue(service.agregarFavorito("u1", peli));
+        assertEquals(1, service.buscarPorId("u1").getFavoritos().size());
+
+        assertFalse(service.agregarFavorito("no-existe", peli));
+        assertFalse(service.agregarFavorito("u1", null));
+        assertFalse(service.agregarFavorito("", peli));
     }
 }

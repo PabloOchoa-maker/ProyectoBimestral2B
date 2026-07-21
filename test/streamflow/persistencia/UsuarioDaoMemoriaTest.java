@@ -4,6 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import streamflow.modelo.Calidad;
+import streamflow.modelo.Contenido;
+import streamflow.modelo.Genero;
+import streamflow.modelo.Pelicula;
 import streamflow.modelo.Usuario;
 
 /**
@@ -79,5 +83,24 @@ class UsuarioDaoMemoriaTest {
     @Test
     void eliminarInexistenteDevuelveFalse() {
         assertFalse(dao.eliminar("no-existe"));
+    }
+
+    @Test
+    void agregarFavoritoLoDejaEnLaListaDelUsuario() {
+        Usuario u = usuarioDe("u1", "Pablo");
+        dao.insertar(u);
+        Contenido peli = new Pelicula("c1", "Interstellar", Genero.DRAMA,
+                Calidad.HD, 169, 4.0, "Nolan");
+
+        assertTrue(dao.agregarFavorito("u1", peli));
+        assertEquals(1, dao.buscarPorId("u1").getFavoritos().size());
+        assertEquals("c1", dao.buscarPorId("u1").getFavoritos().get(0).getId());
+    }
+
+    @Test
+    void agregarFavoritoAusuarioInexistenteDevuelveFalse() {
+        Contenido peli = new Pelicula("c1", "Interstellar", Genero.DRAMA,
+                Calidad.HD, 169, 4.0, "Nolan");
+        assertFalse(dao.agregarFavorito("no-existe", peli));
     }
 }
