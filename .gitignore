@@ -7,8 +7,9 @@ nbactions.xml
 build/
 dist/
 
-# Base de datos SQLite (se genera al ejecutar)
+# Base de datos SQLite (la base sembrada SÍ se versiona; el profesor la pide)
 db/*.db
+!db/baseDeDatosStreamflow.db
 
 # IDE / SO
 .idea/
@@ -16,3 +17,6 @@ db/*.db
 .vscode/
 Thumbs.db
 desktop.ini
+
+# Archivos temporales de Word (lock)
+~$*

@@ -110,6 +110,13 @@ package modelo #E8F5E9 {
 }
 
 package vista #E1F5FE {
+
+    interface IVista {
+        +mostrarMenu(): void
+        +mostrarContenidos(lista: List<Contenido>): void
+        +iniciar(): void
+    }
+
     class ConsolaVista {
         -contenidoControlador: IContenidoControlador
         -usuarioControlador: IUsuarioControlador
@@ -119,13 +126,7 @@ package vista #E1F5FE {
         +iniciar(): void
     }
 
-    interface IVista {
-        +mostrarMenu(): void
-        +mostrarContenidos(lista: List<Contenido>): void
-        +iniciar(): void
-    }
-
-    ConsolaVista ..|> IVista
+    ConsolaVista .up.|> IVista
 }
 
 package controlador #FFFDE7 {
@@ -158,8 +159,8 @@ package controlador #FFFDE7 {
         +agregarFavorito(idUsuario: String, c: Contenido): boolean
     }
 
-    ContenidoControlador ..|> IContenidoControlador
-    UsuarioControlador ..|> IUsuarioControlador
+    ContenidoControlador .up.|> IContenidoControlador
+    UsuarioControlador .up.|> IUsuarioControlador
 }
 
 package servicio #EDE7F6 {
@@ -311,11 +312,16 @@ SuscripcionServiceImpl --> IContenidoDao
 RecomendacionServiceImpl --> IContenidoDao
 
 
-' --- Columna vertical forzada: vista arriba, luego controlador/servicio/persistencia ---
-ConsolaVista -[hidden]-> IVista
-IVista -[hidden]-> ContenidoControlador
+' --- Columna vertical forzada: cada implementacion queda debajo de su interfaz,
+'     y la siguiente capa debajo de la implementacion anterior ---
+ConsolaVista -[hidden]-> IContenidoControlador
 ContenidoControlador -[hidden]-> IContenidoService
 ContenidoServiceImpl -[hidden]-> IContenidoDao
+
+' --- Empuja la columna vista/controlador/servicio/persistencia a la derecha
+'     del paquete modelo ---
+Usuario -[hidden]right-> IVista
+Contenido -[hidden]right-> IContenidoControlador
 
 legend right
   <b>Leyenda</b>
